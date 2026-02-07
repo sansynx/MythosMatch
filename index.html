@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Mythos Match | Greek Memory Challenge</title>
+    <link rel="icon" type="image/png" href="assets/favicon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="multiplayer-styles.css">
+    <!-- PeerJS for WebRTC P2P -->
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+
+</head>
+<body>
+
+    <div class="background-overlay"></div>
+
+    <div id="app">
+        <!-- Main Menu -->
+        <section id="menu-screen" class="screen active">
+            <div class="logo-container">
+                <h1 class="game-title">MYTHOS MATCH</h1>
+                <p class="game-subtitle">The Ancient Memory Challenge</p>
+            </div>
+            
+            <div class="menu-options">
+                <button class="btn primary-btn" onclick="UI.showModeSetup('solo')">Solo Odyssey</button>
+                <button class="btn secondary-btn" onclick="UI.showModeSetup('multi')">Duel of Fates (2P)</button>
+                <button class="btn secondary-btn" onclick="UI.showModeSetup('online')">Online Multiplayer</button>
+            </div>
+        </section>
+
+        <!-- Mode Setup Screen (Card Count Input) -->
+        <section id="mode-setup-screen" class="screen hidden">
+            <h2 id="mode-title">Select Number of Cards</h2>
+            
+            <div class="settings-group">
+                <label>Total Number of Cards</label>
+                <input type="number" id="card-count-input" placeholder="Enter number of cards" min="4" max="104" step="2" value="16" oninput="UI.validateCardCount()">
+                <p id="card-count-error" class="error-message" style="display: none;"></p>
+                <p class="grid-preview" id="grid-preview">Grid Size: 4x4</p>
+            </div>
+
+            <div class="menu-options">
+                <button class="btn primary-btn" id="start-game-btn" onclick="Game.startFromSetup()">Start Game</button>
+                <button class="btn text-btn" onclick="UI.showScreen('menu-screen')">Back</button>
+            </div>
+        </section>
+
+        <!-- Online Multiplayer Room Screen -->
+        <section id="multiplayer-room-screen" class="screen hidden">
+            <h2>Online Multiplayer</h2>
+            <p class="mode-info">Grid Configuration: <span id="selected-grid-display">4x4 (16 cards)</span></p>
+            
+            <div class="connection-status" id="connection-status">
+                <span class="status-indicator"></span>
+                <span class="status-text">Not Connected</span>
+            </div>
+
+            <div class="multiplayer-options">
+                <div class="option-card">
+                    <h3>Host Game</h3>
+                    <p>Create a room and share the code</p>
+                    <button class="btn primary-btn" onclick="Multiplayer.createRoom()">Create Room</button>
+                    <div id="room-code-display" class="room-code hidden">
+                        <label>Room Code:</label>
+                        <div class="code-box">
+                            <span id="room-code-text">------</span>
+                            <button class="copy-btn" id="copy-room-btn" onclick="Multiplayer.copyRoomCode()" disabled>Copy</button>
+                        </div>
+                        <p class="hint">Share this code with your friend</p>
+                    </div>
+                </div>
+
+                <div class="divider">OR</div>
+
+                <div class="option-card">
+                    <h3>Join Game</h3>
+                    <p>Enter the room code to join</p>
+                    <input type="text" id="room-code-input" placeholder="Enter room code" maxlength="6">
+                    <button class="btn primary-btn" onclick="Multiplayer.joinRoom()">Join Room</button>
+                </div>
+            </div>
+
+            <button class="btn text-btn" onclick="UI.backToModeSetup(); Multiplayer.disconnect();">Back</button>
+        </section>
+
+        <!-- Game Screen -->
+        <section id="game-screen" class="screen hidden">
+            <header class="game-hud">
+                <div class="hud-group left">
+                    <div class="turn-indicator-side" id="p1-turn-indicator">P1 Turn</div>
+                </div>
+
+                <div class="hud-group center">
+                     <div class="score-card-main" id="player1-score-box">
+                        <span class="label">P1</span>
+                        <div class="value" id="score-p1">100</div>
+                    </div>
+                    
+                    <button class="icon-btn quit-btn" onclick="Game.quit()" aria-label="Quit Game">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M2 2L14 14M14 2L2 14" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+                        </svg>
+                    </button>
+                    
+                    <div class="score-card-main hidden" id="player2-score-box">
+                        <span class="label">P2</span>
+                        <div class="value" id="score-p2">100</div>
+                    </div>
+                </div>
+
+                <div class="hud-group right">
+                    <div class="turn-indicator-side" id="p2-turn-indicator">P2 Turn</div>
+                </div>
+            </header>
+
+            <div class="game-board-container">
+                <div id="game-board" class="grid-4x4">
+                    <!-- Cards injected here -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Result Screen -->
+        <section id="result-screen" class="screen hidden">
+            <h2 id="result-title">Victory!</h2>
+            <p id="result-message">The gods favor you.</p>
+            
+            <div class="score-summary">
+                <div class="final-score" id="final-score-display">Score: 80</div>
+            </div>
+
+            <div class="menu-options">
+                <button class="btn primary-btn" onclick="Game.restart()">Play Again</button>
+                <button class="btn secondary-btn" onclick="UI.showScreen('menu-screen')">Main Menu</button>
+            </div>
+        </section>
+        
+        <div id="toast">Message</div>
+    </div>
+
+    <script src="multiplayer.js"></script>
+    <script src="script.js"></script>
+    <!-- Updated: Clean letter display -->
+</body>
+</html>
