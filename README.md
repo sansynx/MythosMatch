@@ -214,7 +214,7 @@ The card count input includes real-time validation:
 ## Dependencies
 
 - **PeerJS**: WebRTC peer-to-peer connections
-  - CDN: `https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js`
+  - CDN: `https://unpkg.com/peerjs@1.5.5/dist/peerjs.min.js`
 - **Google Fonts**: Cinzel (headings), Inter (body text)
 
 ## Running the Game
