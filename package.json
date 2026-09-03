@@ -1,0 +1,21 @@
+{
+  "name": "mythosmatch",
+  "version": "1.0.0",
+  "description": "Mythos Match - Greek Memory Card Game with WebRTC P2P Multiplayer",
+  "main": "script.js",
+  "scripts": {
+    "start": "npx serve ."
+  },
+  "keywords": [
+    "memory-game",
+    "webrtc",
+    "peerjs",
+    "multiplayer",
+    "greek-mythology"
+  ],
+  "author": "sanath",
+  "license": "MIT",
+  "dependencies": {
+    "peerjs": "^1.5.5"
+  }
+}
